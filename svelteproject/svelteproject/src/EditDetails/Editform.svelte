@@ -1,16 +1,16 @@
 <script>
- import PersonalDetails from "../components/ResumeDetails/PersonalDetails.svelte";
- import EducationDetails from "../components/ResumeDetails/EducationDetails.svelte";
- import AddressDetails from "../components/ResumeDetails/AddressDetails.svelte";
- import ProjectDetails from "../components/ResumeDetails/ProjectDetails.svelte";
- import SkillsDetails from "../components/ResumeDetails/SkillsDetails.svelte";
- import SocialMediaDetails from "../components/ResumeDetails/SocialMediaDetails.svelte";
- import WorkExperienceDetails from "../components/ResumeDetails/WorkExperienceDetails.svelte";
- import ButtonInput from "../components/InputFields/Button.svelte";
+  import PersonalDetails from "../components/ResumeDetails/PersonalDetails.svelte";
+  import EducationDetails from "../components/ResumeDetails/EducationDetails.svelte";
+  import AddressDetails from "../components/ResumeDetails/AddressDetails.svelte";
+  import ProjectDetails from "../components/ResumeDetails/ProjectDetails.svelte";
+  import SkillsDetails from "../components/ResumeDetails/SkillsDetails.svelte";
+  import SocialMediaDetails from "../components/ResumeDetails/SocialMediaDetails.svelte";
+  import WorkExperienceDetails from "../components/ResumeDetails/WorkExperienceDetails.svelte";
+  import ButtonInput from "../components/InputFields/Button.svelte";
   import Icon from "@iconify/svelte";
   import arrowLeftIcon from "@iconify/icons-mdi/arrow-left";
   import { prevent_default } from "svelte/internal";
-  import {  
+  import {
     validatePhone,
     validateImageUrl,
     validateFullName,
@@ -22,13 +22,15 @@
     validateCourseName,
     validateInstitute,
     validateInstituteLocation,
-    validateZipcode, validateEmail, } from "../components/validation";
+    validateZipcode,
+    validateEmail,
+  } from "../components/validation";
   let recordId = window.history.state.recordId;
   console.log(recordId);
   let showMessage = "";
   let successMessage = "";
   let warningMessage = "";
-  let showError=false;
+  let showError = false;
   export let formValue = {};
   // basic details
   export let full_name = "";
@@ -78,52 +80,45 @@
   export let projectDetails = [
     { project_name: "", project_description: "", skills: "" },
   ];
-
+  //Fetches resume data from the server based on the provided recordId.
   async function apiSearchResumeById(recordId) {
     console.log(recordId);
-      if (recordId != "") {
-        const response = await fetch(
-          `http://127.0.0.1:8000/resume/${recordId}`,
-          {
-            method: "GET",
-          }
-        );
-        const data = await response.json();
-        console.log(data);
+    if (recordId != "") {
+      // Make an asynchronous HTTP GET request to the resume API endpoint
+      const response = await fetch(`http://127.0.0.1:8000/resume/${recordId}`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      console.log(data);
+      // Extract and assign various resume details to variables for further use
+      full_name = data.PersonalDetails.full_name;
+      email = data.PersonalDetails.email;
+      phone_number = data.PersonalDetails.phone_number;
+      image_url = data.PersonalDetails.image_url;
+      summary = data.PersonalDetails.summary;
+      address_line = data.addressDetails.address_line;
+      street_name = data.addressDetails.street_name;
+      city = data.addressDetails.city;
+      country = data.addressDetails.country;
+      zip_code = data.addressDetails.zip_code;
+      educationDetails = data.educationDetails;
+      workExperienceDetails = data.workExperienceDetails;
+      projectDetails = data.projectDetails;
+      skillList = data.skillList;
+      socialMediaDetails = data.socialMediaDetails;
+    }
+  }
+  apiSearchResumeById(recordId);
 
-        full_name = data.PersonalDetails.full_name
-        email = data.PersonalDetails.email
-        phone_number = data.PersonalDetails.phone_number
-        image_url = data.PersonalDetails.image_url
-        summary = data.PersonalDetails.summary
-        // console.log(data.addressDetails)
-        address_line = data.addressDetails.address_line
-        street_name = data.addressDetails.street_name
-        city = data.addressDetails.city
-        country = data.addressDetails.country
-        zip_code = data.addressDetails.zip_code
-
-        educationDetails = data.educationDetails;
-        workExperienceDetails = data.workExperienceDetails;
-        projectDetails = data.projectDetails;
-
-        skillList = data.skillList;
-        socialMediaDetails = data.socialMediaDetails;
-        
-
-    }}
-    apiSearchResumeById(recordId);
-
-  async function submitForm(){
-    formValue = 
-    {
-      "PersonalDetails":{full_name,email,phone_number,image_url,summary},
-      "addressDetails":{address_line,street_name,city,country,zip_code},
+  async function submitForm() {
+    formValue = {
+      PersonalDetails: { full_name, email, phone_number, image_url, summary },
+      addressDetails: { address_line, street_name, city, country, zip_code },
       educationDetails,
       socialMediaDetails,
       workExperienceDetails,
       skillList,
-      projectDetails
+      projectDetails,
     };
     let fullNameCheck = validateFullName(full_name);
     //Validate phone number
@@ -136,20 +131,24 @@
     let summaryCheck = validateSummary(summary);
     // Validate address
     let addressCheck = validateAddress(address_line);
-    // Validate phone city
+    // Validate city
     let cityCheck = validateCity(city);
     // validate state
     // validate country
     let countryCheck = validateCountry(country);
     // validate zipcode
-    let zipcodeCheck = validateZipcode(zip_code)
+    let zipcodeCheck = validateZipcode(zip_code);
     // Initialize an empty array to store education errors
     let educationErrors = [];
     // iterating more than one educational details
     for (let i = 0; i < educationDetails.length; i++) {
-      let qualificationCheck = validateQualification(educationDetails[i].qualification);
+      let qualificationCheck = validateQualification(
+        educationDetails[i].qualification
+      );
       let coursenameCheck = validateCourseName(educationDetails[i].course_name);
-      let instituteCheck = validateInstitute(educationDetails[i].institute_name);
+      let instituteCheck = validateInstitute(
+        educationDetails[i].institute_name
+      );
       let instituteLocationCheck = validateInstituteLocation(
         educationDetails[i].location
       );
@@ -157,7 +156,7 @@
         qualificationCheck !== "" ||
         coursenameCheck != "" ||
         instituteCheck !== "" ||
-        instituteLocationCheck !== "" 
+        instituteLocationCheck !== ""
       ) {
         educationErrors.push({
           index: i,
@@ -168,7 +167,7 @@
         });
       }
     }
-   // if condition to check the form fields are empty or contain invalid data
+    // if condition to check the form fields are empty or contain invalid data
     if (
       fullNameCheck != "" ||
       phoneCheck != "" ||
@@ -181,38 +180,40 @@
       zipcodeCheck !== "" ||
       educationErrors.length > 0
     ) {
-      // it prevents the default form submission 
+      // it prevents the default form submission
       prevent_default();
       showError = true;
       showMessage = "Please fill all the required details correctly";
       window.scrollTo(0, 0);
-    }
-    else{
-      try{
-            const response = await fetch(`http://127.0.0.1:8000/edit-data/${recordId}`,{
-                method : "PUT",
-                mode : "cors",
-                cache : "no-cache",
-                headers: {
-                    "Content-Type" : "application/json"
+    } else {
+      try {
+        // Make an asynchronous HTTP PUT request to the server
+        const response = await fetch(
+          `http://127.0.0.1:8000/edit-data/${recordId}`,
+          {
+            method: "PUT",
+            mode: "cors",
+            cache: "no-cache",
+            headers: {
+              "Content-Type": "application/json",
             },
-            // body: JSON.stringify(formValue)
-            body: JSON.stringify(formValue)
-            });
-   
-          const result = await response.json();
-          console.log("Success:", result);
-          successMessage = "Resume saved successfully!";
-          document.getElementById('clear-form').reset();
-          window.scrollTo(0, 0);
-}
-catch(error){
-            console.log("Error:",error);
-            warningMessage = "Failed to update details. Please try again";
-            window.scrollTo(0, 0);
-        }
-        console.log(submitForm);
-}
+           // Sending JSON-serialized form data in the request body
+            body: JSON.stringify(formValue),
+          }
+        );
+        // Parse the JSON response from the server
+        const result = await response.json();
+        console.log("Success:", result);
+        successMessage = "Resume updated successfully!";
+        document.getElementById("clear-form").reset();
+        window.scrollTo(0, 0);
+      } catch (error) {
+        console.log("Error:", error);
+        warningMessage = "Failed to update details. Please try again";
+        window.scrollTo(0, 0);
+      }
+      console.log(submitForm);
+    }
   }
 </script>
 
@@ -223,36 +224,42 @@ catch(error){
         <!-- error messages if any fields are invalid -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <span class="closebtn" on:click={() => (showMessage = false)}>&times;</span>
+        <span class="closebtn" on:click={() => (showMessage = false)}
+          >&times;</span
+        >
         <!-- svelte-ignore missing-declaration -->
         <p class="error-message">{showMessage}</p>
-    </div>
+      </div>
     {/if}
 
     <!-- svelte-ignore missing-declaration -->
     {#if warningMessage}
       <div class="warning-alert">
-          <!-- error messages if any fields are invalid -->
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <span class="closebtn" on:click={() => (warningMessage = false)}>&times;</span>
-          <!-- svelte-ignore missing-declaration -->
-          <p class="error-message">{warningMessage}</p>
+        <!-- error messages if any fields are invalid -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <span class="closebtn" on:click={() => (warningMessage = false)}
+          >&times;</span
+        >
+        <!-- svelte-ignore missing-declaration -->
+        <p class="error-message">{warningMessage}</p>
       </div>
     {/if}
 
-   <!-- svelte-ignore missing-declaration -->
-   {#if successMessage}
+    <!-- svelte-ignore missing-declaration -->
+    {#if successMessage}
+      <!-- svelte-ignore missing-declaration -->
+
+      <div class="success-alert">
+        <!-- error messages if any fields are invalid -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <span class="closebtn" on:click={() => (successMessage = false)}
+          >&times;</span
+        >
         <!-- svelte-ignore missing-declaration -->
-    
-        <div class="success-alert">
-            <!-- error messages if any fields are invalid -->
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <span class="closebtn" on:click={() => (successMessage = false)}>&times;</span>
-            <!-- svelte-ignore missing-declaration -->
-            <p class="success-message">{successMessage}</p>
-        </div>
+        <p class="success-message">{successMessage}</p>
+      </div>
     {/if}
 
     <div class="back-container">
@@ -295,12 +302,14 @@ catch(error){
         label="Save"
         icon="fa fa-save"
       />
-    <a href="#/list">  <ButtonInput
-        buttonClass="cancel-button"
-        type="button"
-        label="Cancel"
-        icon="fa fa-times"
-      /></a>
+      <a href="#/list">
+        <ButtonInput
+          buttonClass="cancel-button"
+          type="button"
+          label="Cancel"
+          icon="fa fa-times"
+        /></a
+      >
     </div>
   </form>
 </main>
@@ -309,14 +318,14 @@ catch(error){
   .mainheading {
     margin-top: 45px;
     width: 100%;
-    height:  90px;
+    height: 90px;
     display: flex;
     flex-direction: column;
     padding: 10px; /* Adjust the padding as needed for spacing */
   }
 
   .heading {
-    font-family: 'Times New Roman', serif;
+    font-family: "Times New Roman", serif;
     top: 0;
     left: 0; /* Remove default margin for the h1 element */
   }
@@ -325,13 +334,13 @@ catch(error){
     display: flex;
     justify-content: end;
   }
- .error-message{
-  margin-left: 60px;
-  color:red;
-  font-size: 20px;
-  height: 13px;
- }
- .warning-alert {
+  .error-message {
+    margin-left: 60px;
+    color: red;
+    font-size: 20px;
+    height: 13px;
+  }
+  .warning-alert {
     padding: 8px;
     background-color: #ffe4e1;
     color: rgb(0, 0, 0);
@@ -375,8 +384,8 @@ catch(error){
   .title {
     font-size: 18px;
   }
-  h3{
-    color:teal;
+  h3 {
+    color: teal;
   }
   .closebtn {
     margin-left: 15px;

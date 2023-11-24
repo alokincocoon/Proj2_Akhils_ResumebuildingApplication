@@ -70,8 +70,10 @@
   function editResume(edit) {
     recordId = edit;
     console.log(recordId);
+    // Append "#/edit" to the current URL and associate the 'recordId' with the state
     window.history.pushState({ recordId }, null, "#/edit");
     document.location.reload();
+    // Dispatch a custom "popstate" event to signal a navigation change
     dispatchEvent(new Event("popstate"));
   }
 </script>
